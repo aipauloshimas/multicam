@@ -1,13 +1,13 @@
 ---
 name: multicam
-description: Use when the user drops or points at a local talking-head video and wants the virtual multi-camera / multi-angle edit prompt for Google Flow (one real take turned into hard cuts between virtual camera angles). Triggers on /multicam, "multicam prompt", "multi-angle edit", a dropped .mp4 plus a camera-cuts request. PT examples for reliability: "faz o prompt multicam desse vídeo", "gera os cortes de câmera desse vídeo", "transforma esse take em multi-ângulo".
+description: Use when the user drops or points at a local talking-head video and wants the virtual multi-camera / multi-angle edit prompt for Google Omni (one real take turned into hard cuts between virtual camera angles). Triggers on /multicam, "multicam prompt", "multi-angle edit", a dropped .mp4 plus a camera-cuts request. PT examples for reliability: "faz o prompt multicam desse vídeo", "gera os cortes de câmera desse vídeo", "transforma esse take em multi-ângulo".
 ---
 
 # /multicam: One Take → Virtual Multi-Camera
 
 ## Overview
 
-Turns ONE real talking-head take into the proven Google Flow prompt that re-frames it from multiple virtual cameras with hard cuts on the speech beats. The prompt **preserves the uploaded source video** — face, room, audio, lip sync all frozen; only the virtual camera changes. It does NOT describe or regenerate the scene.
+Turns ONE real talking-head take into the proven Google Omni prompt that re-frames it from multiple virtual cameras with hard cuts on the speech beats. The prompt **preserves the uploaded source video** — face, room, audio, lip sync all frozen; only the virtual camera changes. It does NOT describe or regenerate the scene.
 
 Core principle: **the template is frozen; only two zones ever change** — the four `[Xs]` timestamps (always) and the four angle descriptions (only if the user asks).
 
@@ -67,7 +67,7 @@ Mutate ONLY:
 - any angle description the user asked to swap (presets below);
 - the subject words inside the angle descriptions — "The man"/"his" → "The woman"/"her" or "The subject"/"their", matching whoever is on screen (extract one frame with ffmpeg and look, if unsure).
 
-Deliver the finished prompt in a fenced code block AND save it as `<video basename>_multicam_prompt.txt` next to the video. Close with usage: upload the source video into Google Flow, select it as source footage, paste the prompt. The delivered prompt is ALWAYS in English, whatever language the conversation or the video is in.
+Deliver the finished prompt in a fenced code block AND save it as `<video basename>_multicam_prompt.txt` next to the video. Close with usage: upload the source video into Google Omni, select it as source footage, paste the prompt. The delivered prompt is ALWAYS in English, whatever language the conversation or the video is in.
 
 ## The canonical template (FROZEN)
 
