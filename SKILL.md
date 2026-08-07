@@ -1,6 +1,6 @@
 ---
 name: multicam
-description: Use when the user drops or points at a local talking-head video and wants the virtual multi-camera / multi-angle edit prompt for Google Omni (one real take turned into hard cuts between virtual camera angles). Triggers on /multicam, "multicam prompt", "multi-angle edit", a dropped .mp4 plus a camera-cuts request. PT examples for reliability: "faz o prompt multicam desse vídeo", "gera os cortes de câmera desse vídeo", "transforma esse take em multi-ângulo".
+description: Use when the user drops or points at a local talking-head video and wants the virtual multi-camera / multi-angle edit prompt for Google Omni (one real take turned into hard cuts between virtual camera angles). Triggers on /multicam, "multicam prompt", "multi-angle edit", a dropped .mp4 plus a camera-cuts request. ES examples for reliability: "hazme el multicam de este vídeo", "genera los cortes de cámara de este vídeo", "convierte esta toma en multicámara". PT examples: "faz o prompt multicam desse vídeo", "gera os cortes de câmera desse vídeo", "transforma esse take em multi-ângulo".
 ---
 
 # /multicam: One Take → Virtual Multi-Camera
