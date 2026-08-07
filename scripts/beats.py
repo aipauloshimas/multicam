@@ -8,6 +8,8 @@ Transcribes a local video with Whisper (word timestamps), then prints:
 The script reports facts; semantic refinement (phrase meaning) is Claude's job.
 Idempotent: reuses <video stem>.json if present unless --force.
 """
+from __future__ import annotations  # PEP 604 `X | None` hints on Python 3.8/3.9
+
 import argparse
 import json
 import shutil
@@ -28,6 +30,13 @@ FUNCTION_WORDS = {
     "o", "os", "as", "um", "uma", "de", "do", "da", "dos", "das", "que", "e",
     "em", "no", "na", "nos", "nas", "pra", "para", "com", "se", "eu", "meu",
     "minha", "seu", "sua", "por", "mais",
+    # Spanish (ES) — talking-head / UGC in Spanish
+    "el", "la", "los", "las", "un", "una", "unos", "unas", "del", "al",
+    "y", "u", "ni", "pero", "porque", "como", "cuando", "donde",
+    "es", "son", "era", "fue", "ser", "está", "estan", "están", "hay",
+    "mi", "mis", "tu", "tus", "su", "sus", "me", "te", "lo", "le", "les",
+    "yo", "él", "ella", "eso", "esto", "esta", "este", "estos", "estas",
+    "muy", "más", "ya", "sí", "también", "sobre", "hacia", "desde", "hasta",
 }
 
 
