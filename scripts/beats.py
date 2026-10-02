@@ -8,6 +8,11 @@ Transcribes a local video with Whisper (word timestamps), then prints:
 The script reports facts; semantic refinement (phrase meaning) is Claude's job.
 Idempotent: reuses <video stem>.json if present unless --force.
 """
+# Keeps the `str | None` annotation below readable on Python 3.8 and 3.9, which
+# cannot evaluate it at definition time. check_env.py accepts 3.8+, so without
+# this the preflight passes and the next step dies on import.
+from __future__ import annotations
+
 import argparse
 import json
 import shutil

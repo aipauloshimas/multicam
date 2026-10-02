@@ -2,7 +2,7 @@
 
 Turn ONE talking-head take into a **virtual multi-camera edit** prompt for **Google Omni**.
 
-You film a single clip on a single camera. The skill finds the beats of your speech, fills a battle-tested prompt template with four cut timestamps, and Google Omni re-frames your real footage from new camera angles with instant hard cuts — same face, same room, same voice, same lip sync. No second camera, no editing timeline.
+You film a single clip on a single camera. The skill finds the beats of your speech, fills a battle-tested prompt template with four cut timestamps, and Google Omni re-frames your real footage from new camera angles with instant hard cuts. The prompt asks Omni to keep the same face, room, voice and lip sync (see Known Omni limits below). No second camera, no editing timeline.
 
 ## How it works
 1. Drop your talking-head video in a folder and ask for the multicam prompt.
@@ -10,7 +10,7 @@ You film a single clip on a single camera. The skill finds the beats of your spe
 3. It transcribes your video **word-level** (Whisper, runs locally) to find exactly where each phrase starts and where you breathe.
 4. It suggests **4 cut points** on those beats (cuts land on phrase starts, inside breaths, never mid-word) and shows you why.
 5. You confirm or adjust the timestamps and the camera angles (left profile, extreme high angle, close-up, and back to the original framing — with presets to swap any of them).
-6. It fills the frozen template and saves a ready-to-paste prompt. Upload your clip into Google Omni, select it as the source footage, paste, generate.
+6. It fills the frozen template, self-checks it (`scripts/verify_prompt.py`) and saves a ready-to-paste prompt. Upload your clip into Google Omni, select it as the source footage, paste, generate.
 
 ## Setup (free and local, no API keys)
 The skill checks this for you: `scripts/check_env.py` reports what's missing, what each piece is for, and the install command for your OS — then asks before installing anything. To set it up manually:
@@ -35,12 +35,16 @@ git clone https://github.com/aipauloshimas/multicam ~/.claude/skills/multicam
 Then open Claude Code, drop in your clip and say: **"make the multicam prompt for this video"**.
 
 ## The template
-The prompt template is frozen on purpose — its strict preservation rules ("do not alter the face... no changes to audio... only the camera position changes") are what keep your identity, room and voice locked while the virtual camera cuts. The skill only ever fills the four `[Xs]` timestamps and, if you ask, swaps the angle descriptions. Everything else ships exactly as validated in production.
+The prompt template is frozen on purpose — its strict preservation rules ("do not alter the face... no changes to audio... only the camera position changes") are what ask Omni to keep your identity, room and voice locked while the virtual camera cuts. The skill only ever fills the four `[Xs]` timestamps and, if you ask, swaps the angle descriptions. Everything else ships exactly as validated in production.
+
+## Known Omni limits
+The prompt asks Omni to keep your audio, lip sync and cut times, but Omni does not always obey (measured on a real take, 2026-08-05): it can rewrite the audio and drop words, deliver cuts up to 0.2s off the plan, and output 720p. After generating, re-transcribe the result, measure the real cuts with ffmpeg, and upscale it. The skill walks you through this recipe (Step 5 in `SKILL.md`).
 
 ## Files
 - `SKILL.md` — the skill (workflow, the frozen template, cut-placement rules, angle presets).
 - `scripts/check_env.py` — preflight dependency check (reports what's missing and how to install it).
 - `scripts/beats.py` — local word-level transcription (Whisper) + speech-beat report + first-guess cut points.
+- `scripts/verify_prompt.py`: self-check that a delivered prompt matches the frozen template outside the mutable zones.
 - `requirements.txt` — the single Python dependency (openai-whisper).
 
 ## License

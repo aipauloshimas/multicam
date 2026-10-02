@@ -7,7 +7,7 @@ description: Use when the user drops or points at a local talking-head video and
 
 ## Overview
 
-Turns ONE real talking-head take into the proven Google Omni prompt that re-frames it from multiple virtual cameras with hard cuts on the speech beats. The prompt **preserves the uploaded source video** — face, room, audio, lip sync all frozen; only the virtual camera changes. It does NOT describe or regenerate the scene.
+Turns ONE real talking-head take into the proven Google Omni prompt that re-frames it from multiple virtual cameras with hard cuts on the speech beats. The prompt **asks Omni to preserve the uploaded source video**: face, room, audio and lip sync should stay frozen and only the virtual camera should change. Omni does not always obey on audio and cut times (see Step 5). It does NOT describe or regenerate the scene.
 
 Core principle: **the template is frozen; only two zones ever change** — the four `[Xs]` timestamps (always) and the four angle descriptions (only if the user asks).
 
@@ -49,7 +49,7 @@ Report the detected `LANGUAGE` and `DURATION` to the user. Flags: `--language <c
 ## Step 3 — Present, then MANDATORY checkpoint
 
 Show the user, in this order:
-1. Two lines on how it works: the prompt freezes identity/room/audio/lip-sync and only the virtual camera changes, in instant hard cuts — that's why it looks like a real multi-cam shoot of the same moment.
+1. Two lines on how it works: the prompt asks Omni to freeze identity/room/audio/lip-sync so only the virtual camera changes, in instant hard cuts, which is why it looks like a real multi-cam shoot of the same moment. Add one line on the known Omni limits (Step 5): audio can be rewritten, cuts drift off the plan, output is 720p.
 2. Phrase table with time windows.
 3. The 4 suggested timestamps, each justified (which phrase the shot covers; which cuts land in breaths).
 4. The template below, still with `[Xs]`.
@@ -67,7 +67,35 @@ Mutate ONLY:
 - any angle description the user asked to swap (presets below);
 - the subject words inside the angle descriptions — "The man"/"his" → "The woman"/"her" or "The subject"/"their", matching whoever is on screen (extract one frame with ffmpeg and look, if unsure).
 
-Deliver the finished prompt in a fenced code block AND save it as `<video basename>_multicam_prompt.txt` next to the video. Close with usage: upload the source video into Google Omni, select it as source footage, paste the prompt. The delivered prompt is ALWAYS in English, whatever language the conversation or the video is in.
+Save the finished prompt as `<video basename>_multicam_prompt.txt` next to the video, then self-check the saved file:
+
+```bash
+python "<this skill's base directory>/scripts/verify_prompt.py" "<saved .txt>" --duration <DURATION>
+```
+
+It must print `PASS` (head and tail byte-identical to the template, every `* At [Xs]:` line keeps its square brackets and one decimal, timestamps ascending and inside the clip). On `FAIL`, fix and re-run before delivering. Take its `WARNING`s back to the user if they touch anything they chose.
+
+Deliver the finished prompt in a fenced code block. Close with usage: upload the source video into Google Omni, select it as source footage, paste the prompt, and mention the known Omni limits (Step 5). The delivered prompt is ALWAYS in English, whatever language the conversation or the video is in.
+
+## Step 5: After generating (known Omni limits)
+
+Measured by the author on a real take (2026-08-05): the prompt asks for more than Omni delivers. Warn the user before they generate (Step 3 and the usage line), in the user's language, and run this recipe when they bring the result back:
+
+- **Audio can be rewritten.** Omni re-rendered the audio even though the prompt says no changes: it dropped words and shifted the tail by 0.1 to 0.4s. Re-transcribe the result and compare the words with the original.
+- **Cuts drift.** Asked for 1.4 / 2.8 / 4.8 / 5.8s, one run delivered 1.5 / 2.83 / 4.96 / 6.0s. Measure the real cuts and re-time anything built on them (captions, overlays) to the measured times, not the plan. The `pts_time` lines are the cuts (a threshold of 0.25 misses the softer angle changes):
+
+  ```bash
+  ffmpeg -i "<result.mp4>" -vf "select='gt(scene,0.06)',metadata=print" -an -f null -
+  ```
+
+- **Output is 720p**, even from a 1080p source. Upscale it for delivery (`-vf scale=-2:1920:flags=lanczos` on a vertical clip is the free baseline).
+- **Lip sync follows Omni's audio.** To get the exact original words back, lay the source audio over the result:
+
+  ```bash
+  ffmpeg -i "<result.mp4>" -i "<source video>" -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -shortest "<out.mp4>"
+  ```
+
+  The mouths were generated against Omni's audio, so the mismatch shows most in the close-up: check that shot before keeping the swap.
 
 ## The canonical template (FROZEN)
 
@@ -148,5 +176,6 @@ Static camera positions only — the template forbids zooms, pans, morphs and an
 - Do NOT restructure, reorder, paraphrase, translate, or grammar-fix the template.
 - Do NOT cut mid-word, and do NOT hand over `NAIVE_CUTS` without the Step 2 refinement.
 - Do NOT change the shot count — always 4 cuts, and cut 4 always returns to the opening framing.
-- Do NOT strip the square brackets when filling the timestamps: `* At [5.7s]:` is correct, `* At 5.7s:` is wrong — check all four lines before saving.
+- Do NOT strip the square brackets when filling the timestamps: `* At [5.7s]:` is correct, `* At 5.7s:` is wrong. `scripts/verify_prompt.py` fails on stripped brackets.
+- Do NOT deliver without a `PASS` from `scripts/verify_prompt.py` on the saved file.
 - Do NOT skip the checkpoint or deliver before the user answers it.

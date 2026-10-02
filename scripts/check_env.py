@@ -59,13 +59,20 @@ def main():
         ffmpeg_install_cmd() + "  (ffprobe ships with ffmpeg)",
     ))
 
+    # beats.py runs the `whisper` command, so the Python package alone is not enough
     wh_cli = shutil.which("whisper") is not None
     wh_mod = importlib.util.find_spec("whisper") is not None
+    if wh_mod and not wh_cli:
+        wh_install = ("the Python package is installed but the `whisper` command is not on PATH "
+                      "(beats.py needs the command): add the folder that holds it (pip names it "
+                      "in its 'not on PATH' warning) to PATH, then re-run this check")
+    else:
+        wh_install = "pip install -U openai-whisper   (or: pip install -r requirements.txt)"
     checks.append((
         "openai-whisper",
-        wh_cli or wh_mod,
+        wh_cli,
         "transcribes your speech locally with word-level timestamps (no API key, no upload)",
-        "pip install -U openai-whisper   (or: pip install -r requirements.txt)",
+        wh_install,
     ))
 
     all_ok = True
